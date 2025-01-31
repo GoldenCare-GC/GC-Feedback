@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Care Feedback</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Golden Care Feedback Form</h1>
+        <h2> </h2>
+        <form id="feedbackForm">
+            <p class="question">1. On a scale of 1-10, how likely are you to recommend Golden Care to a friend or family member?</p>
+            <div class="rating">
+                <div class="number-box"><input type="radio" id="rating1" name="recommendation" value="1" required><label for="rating1">1</label></div>
+                <div class="number-box"><input type="radio" id="rating2" name="recommendation" value="2" required><label for="rating2">2</label></div>
+                <div class="number-box"><input type="radio" id="rating3" name="recommendation" value="3" required><label for="rating3">3</label></div>
+                <div class="number-box"><input type="radio" id="rating4" name="recommendation" value="4" required><label for="rating4">4</label></div>
+                <div class="number-box"><input type="radio" id="rating5" name="recommendation" value="5" required><label for="rating5">5</label></div>
+                <div class="number-box"><input type="radio" id="rating6" name="recommendation" value="6" required><label for="rating6">6</label></div>
+                <div class="number-box"><input type="radio" id="rating7" name="recommendation" value="7" required><label for="rating7">7</label></div>
+                <div class="number-box"><input type="radio" id="rating8" name="recommendation" value="8" required><label for="rating8">8</label></div>
+                <div class="number-box"><input type="radio" id="rating9" name="recommendation" value="9" required><label for="rating9">9</label></div>
+                <div class="number-box"><input type="radio" id="rating10" name="recommendation" value="10" required><label for="rating10">10</label></div>
+            </div>
+
+            <p class="question">2. How would you rate the care and compassion you or your loved one received during the visit?</p>
+            <div class="rating">
+                <input type="radio" id="care1" name="care" value="Very Dissatisfied" required><label for="care1">😡</label>
+                <input type="radio" id="care2" name="care" value="Dissatisfied" required><label for="care2">😟</label>
+                <input type="radio" id="care3" name="care" value="Neutral" required><label for="care3">😐</label>
+                <input type="radio" id="care4" name="care" value="Satisfied" required><label for="care4">🙂</label>
+                <input type="radio" id="care5" name="care" value="Very Satisfied" required><label for="care5">😃</label>
+            </div>
+
+            <p class="question">3. How would you rate your overall satisfaction with the services provided?</p>
+            <div class="rating">
+                <input type="radio" id="satisfaction1" name="satisfaction" value="Very Dissatisfied" required><label for="satisfaction1">😡</label>
+                <input type="radio" id="satisfaction2" name="satisfaction" value="Dissatisfied" required><label for="satisfaction2">😟</label>
+                <input type="radio" id="satisfaction3" name="satisfaction" value="Neutral" required><label for="satisfaction3">😐</label>
+                <input type="radio" id="satisfaction4" name="satisfaction" value="Satisfied" required><label for="satisfaction4">🙂</label>
+                <input type="radio" id="satisfaction5" name="satisfaction" value="Very Satisfied" required><label for="satisfaction5">😃</label>
+            </div>
+
+            <button type="submit" class="button">Submit</button>
+        </form>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
