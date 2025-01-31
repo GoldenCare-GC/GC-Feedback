@@ -32,7 +32,6 @@ p {
     text-align: left; /* Align the questions to the left */
     padding-left: 10px; /* Optional: Small left padding for better alignment */
 }
-}
 .rating {
     display: flex;
     justify-content: space-between;
