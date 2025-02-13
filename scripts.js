@@ -28,14 +28,13 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
     }).then(response => {
         if (response.ok) {
             alert('Form submitted successfully!');
+            this.reset();
 
-            // If both satisfaction and care are "Satisfied" or "Very Satisfied", show the modal
+            // If both satisfaction and care are "Satisfied" or "Very Satisfied", show the custom notification
             if ((satisfaction === 'Satisfied' || satisfaction === 'Very Satisfied') &&
                 (care === 'Satisfied' || care === 'Very Satisfied')) {
-                showModal();
+                alert('Golden Care Dental Services would love your feedback. Post a review to our profile. https://g.page/r/CV4A-V_FQ4DQEBE/review');
             }
-
-            this.reset();
         } else {
             alert('There was an error submitting the form.');
         }
@@ -44,22 +43,3 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
         alert('There was an error submitting the form.');
     });
 });
-
-function showModal() {
-    const modal = document.getElementById('reviewModal');
-    const span = document.getElementsByClassName('close')[0];
-
-    modal.style.display = 'block';
-
-    span.onclick = function() {
-        modal.style.display = 'none';
-        window.open('https://g.page/r/CV4A-V_FQ4DQEBE/review', '_blank');
-    }
-
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.style.display = 'none';
-            window.open('https://g.page/r/CV4A-V_FQ4DQEBE/review', '_blank');
-        }
-    }
-}
