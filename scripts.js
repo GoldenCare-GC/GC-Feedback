@@ -30,11 +30,11 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
             alert('Form submitted successfully!');
             this.reset();
 
-            // If both satisfaction and care are "Satisfied" or "Very Satisfied", open Google review page and show notification
+            // If both satisfaction and care are "Satisfied" or "Very Satisfied", open Google review page
             if ((satisfaction === 'Satisfied' || satisfaction === 'Very Satisfied') &&
                 (care === 'Satisfied' || care === 'Very Satisfied')) {
-                window.open('https://g.page/r/CV4A-V_FQ4DQEBE/review', '_blank');
-                alert('Golden Care Dental Services would love your feedback. Post a review to our profile. https://g.page/r/CV4A-V_FQ4DQEBE/review');
+                window.open('https://www.google.com/maps/place//data=!4m3!3m2!1s0x882b328b0bfefb7f:0xd08043c55ff9005e!12e1?source=g.page.m.nr._&laa=nmx-review-solicitation-recommendation-card', '_blank');
+                alert('Golden Care Dental Services would love your feedback. Post a review to our profile. https://g.page/r/CV4A-V_FQ4DQEBE/review.');
             }
         } else {
             alert('There was an error submitting the form.');
