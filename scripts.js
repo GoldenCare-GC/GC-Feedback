@@ -28,14 +28,15 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
     }).then(response => {
         if (response.ok) {
             alert('Form submitted successfully!');
-            this.reset();
 
             // If both satisfaction and care are "Satisfied" or "Very Satisfied", open Google review page
             if ((satisfaction === 'Satisfied' || satisfaction === 'Very Satisfied') &&
                 (care === 'Satisfied' || care === 'Very Satisfied')) {
-                window.open('https://shorturl.at/wUYz3', '_blank');
-                alert('Kindly, if you can add a Google review.');
+                alert('Golden Care Dental Services would love your feedback. Post a review to our profile. https://g.page/r/CV4A-V_FQ4DQEBE/review');
+                window.open('https://g.page/r/CV4A-V_FQ4DQEBE/review', '_blank');
             }
+
+            this.reset();
         } else {
             alert('There was an error submitting the form.');
         }
