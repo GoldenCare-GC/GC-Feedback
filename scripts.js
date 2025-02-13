@@ -30,9 +30,10 @@ document.getElementById('feedbackForm').addEventListener('submit', function(even
             alert('Form submitted successfully!');
             this.reset();
 
-            // If both satisfaction and care are "Satisfied" or "Very Satisfied", show the custom notification
+            // If both satisfaction and care are "Satisfied" or "Very Satisfied", open Google review page and show notification
             if ((satisfaction === 'Satisfied' || satisfaction === 'Very Satisfied') &&
                 (care === 'Satisfied' || care === 'Very Satisfied')) {
+                window.open('https://g.page/r/CV4A-V_FQ4DQEBE/review', '_blank');
                 alert('Golden Care Dental Services would love your feedback. Post a review to our profile. https://g.page/r/CV4A-V_FQ4DQEBE/review');
             }
         } else {
