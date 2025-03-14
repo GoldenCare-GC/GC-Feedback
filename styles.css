@@ -19,7 +19,7 @@ body {
     margin-bottom: 20px;
 }
 h1, h2 {
-    color: #FFA500; /* Change color to orange */
+    color: #FF4500; /* Change color to orange */
     text-align: center; /* Ensure both are centered */
 }
 p {
@@ -67,7 +67,7 @@ p {
     border-radius: 5px;
 }
 .button {
-    background-color: #FFA500;
+    background-color: #FF4500;
     color: white;
     padding: 15px 25px;
     border: none;
