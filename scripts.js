@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const date = new Date().toISOString().split('T')[0]; // Extracts the date part
         formData.append('Date', date);
 
-        fetch('https://default3e19444eb3a24c6bbc4b25b849353c.55.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3957383185d14d4ab8db9cd5c38365fc/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xTpGMGZ9R3usiFQm1Pd2DCesvIIwHn6fQEacN8v-Lzo', {
+        fetch('https://default3e19444eb3a24c6bbc4b25b849353c.55.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/9ec9541a68494bcca8779d08af7f4ac2/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=iV9L05BqXQg1SByS4S2JHVewMl05Znbp3XSdvj4jzfw', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -123,5 +123,6 @@ document.addEventListener('DOMContentLoaded', () => {
         this.reset();
     });
 });
+
 
 
