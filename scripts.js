@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     formData.append('bestTime', bestTime);
 
                     // Send data to Power Automate (Second Trigger)
-                    fetch('https://prod-00.canadacentral.logic.azure.com:443/workflows/3957383185d14d4ab8db9cd5c38365fc/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=5etDHsQX1ipYSY0RKwzktrAb34GN9mC2pP3sj6Y6H10', {
+                    fetch('https://default3e19444eb3a24c6bbc4b25b849353c.55.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/3957383185d14d4ab8db9cd5c38365fc/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=xTpGMGZ9R3usiFQm1Pd2DCesvIIwHn6fQEacN8v-Lzo', {
                         method: 'POST',
                         headers: {
                             'Accept': 'application/json',
@@ -123,4 +123,5 @@ document.addEventListener('DOMContentLoaded', () => {
         this.reset();
     });
 });
+
 
