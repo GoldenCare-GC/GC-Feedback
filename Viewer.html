@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Care Feedback Viewer</title>
+    
+    <!-- Firebase SDKs - v9 Modular syntax via CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+
+    <!-- Chart.js CDN for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5; /* Light background */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #e67e22; /* Golden Care Orange */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            max-width: 90%; /* Allows it to be wider on larger screens */
+            width: 100%; /* Take full width within max-width */
+            margin-bottom: 20px;
+            box-sizing: border-box; /* Include padding/border in width */
+        }
+
+        /* --- Login Form Styles --- */
+        #login-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            padding: 40px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+            margin: 50px auto;
+        }
+        #login-section h2 {
+            color: #e67e22;
+            margin-bottom: 20px;
+        }
+        #login-section input[type="email"],
+        #login-section input[type="password"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #login-section button {
+            background-color: #e67e22;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #login-section button:hover {
+            background-color: #d35400;
+        }
+
+        /* --- Viewer Section Styles --- */
+        #viewer-section {
+            display: none; /* Hidden by default, shown after login */
+            width: 100%;
+            max-width: 1200px; /* Increased max-width for better analysis display */
+        }
+        #viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        #logout-button {
+            background-color: #e67e22;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #logout-button:hover {
+            background-color: #d35400;
+        }
+
+        /* --- Tabs Styles --- */
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            width: 100%; /* Ensure tabs span full width of container */
+            box-sizing: border-box; /* Include padding/border in width */
+        }
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            margin-right: 5px;
+            transition: background-color 0.3s ease;
+            font-weight: bold;
+            color: #555;
+        }
+        .tab-button.active {
+            background-color: #fff;
+            border-color: #ddd;
+            border-bottom: 2px solid #fff; /* Create illusion of being "on top" */
+            color: #e67e22;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+        .tab-content {
+            display: none; /* Hidden by default */
+            padding: 20px 0;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* --- Filters Styles --- */
+        #filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            align-items: center;
+            flex-wrap: wrap; /* Allow filters to wrap on smaller screens */
+            justify-content: center; /* Center filters */
+        }
+        #filters label {
+            font-weight: bold;
+            color: #555;
+        }
+        #filters select {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #fdfdfd;
+            cursor: pointer;
+        }
+
+        /* --- Table Styles --- */
+        /* Wrapper for the raw data feedback table to enable scrolling */
+        .feedback-table-wrapper {
+            overflow-x: auto; /* Enables horizontal scrolling when content is too wide */
+            margin-top: 20px; /* Space above the table */
+            margin-bottom: 20px; /* Space below the table */
+            width: 100%; /* Occupy full width of its parent */
+            /* Using 'auto' for overflow-x means the scrollbar only appears when needed.
+               If you want it to be ALWAYS visible, change to 'scroll'.
+               'auto' is generally preferred for better UX to avoid unnecessary scrollbars. */
+        }
+
+        #feedback-table {
+            width: 100%; /* Try to fill parent width, but allow min-width to override */
+            border-collapse: collapse;
+            table-layout: auto; /* Let browser determine column widths based on content */
+            min-width: fit-content; /* Allow table to grow beyond 100% width if content requires it */
+        }
+        #feedback-table th, #feedback-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            font-size: 14px;
+            white-space: nowrap; /* Prevent most text from wrapping to fit content */
+        }
+        #feedback-table th {
+            background-color: #e67e22; /* Golden Care Orange for table header */
+            color: white;
+            font-weight: bold;
+        }
+        #feedback-table tbody tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+        #feedback-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        
+        /* Special handling for Comments column to allow wrapping for readability */
+        #feedback-table th:nth-child(5), /* Target the Comments header */
+        #feedback-table td:nth-child(5) { /* Target the Comments data cells */
+            white-space: normal; /* Allow text to wrap */
+            word-break: break-word; /* Ensure long words break */
+            max-width: 250px; /* Optional: A flexible max-width for comments cell */
+            /* min-width added to give it a sensible starting width, so other cells aren't too squished */
+            min-width: 150px; 
+        }
+
+        /* --- Analysis Section Styles --- */
+        .analysis-section {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .analysis-section h4 {
+            color: #e67e22;
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        /* Wrapper for horizontally scrollable tables */
+        .analysis-table-wrapper {
+            overflow-x: auto; /* Enable horizontal scrolling */
+            margin-bottom: 20px;
+        }
+        .analysis-table {
+            min-width: 1400px; /* Minimum width to comfortably fit 12 months + total + labels */
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-bottom: 25px;
+        }
+        .analysis-table th, .analysis-table td {
+            white-space: nowrap; /* Prevent text wrapping in cells */
+            padding: 8px 12px; /* Adjust padding for narrower cells */
+            text-align: right; /* Align numbers to the right */
+            border: 1px solid #ccc; /* Darker border for better visibility */
+        }
+        .analysis-table th:first-child,
+        .analysis-table td:first-child {
+            text-align: left; /* Align first column (labels) to the left */
+            position: sticky; /* Keep first column visible on scroll */
+            left: 0;
+            background-color: #f2f2f2; /* Match header background */
+            z-index: 10;
+        }
+        .analysis-table thead th {
+            background-color: #e67e22; /* Golden Care Orange for header */
+            color: white;
+            font-weight: bold;
+            position: sticky; /* Keep header row visible on vertical scroll */
+            top: 0;
+            z-index: 1; /* Below the sticky first column header */
+        }
+        .analysis-table thead th:first-child {
+            background-color: #e67e22; /* Ensure sticky first column header matches */
+            z-index: 11; /* Ensure top-left corner is above other sticky elements */
+        }
+        .analysis-table tbody tr:nth-child(even) {
+            background-color: #f5f5f5; /* Slightly more distinct alternating row color */
+        }
+        .analysis-table tbody tr:hover {
+            background-color: #e8e8e8; /* Slightly darker hover for contrast */
+        }
+        /* Style for percentage highlights */
+        .analysis-table td.highlight-green {
+            background-color: #e6ffe6; /* Light green */
+            font-weight: bold;
+        }
+        .analysis-table td.highlight-red {
+            background-color: #ffe6e6; /* Light red */
+            font-weight: bold;
+        }
+        .chart-container {
+            position: relative;
+            height: 400px; /* Adjust height as needed for better visualization */
+            width: 100%;
+            margin: 0 auto;
+        }
+
+
+        /* --- Loading Indicator Styles --- */
+        #loading-indicator, #analysis-loading-indicator {
+            display: none; /* Hidden by default */
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-style: italic;
+        }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #e67e22;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Cell Tooltip Styles --- */
+        #cell-tooltip {
+            position: absolute;
+            display: none; /* Hidden by default */
+            background-color: #fefefe;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            max-width: 400px; /* Limit width */
+            z-index: 1000; /* Ensure it's on top of everything */
+            font-size: 0.9em;
+            line-height: 1.4;
+            word-wrap: break-word; /* Allow content to wrap */
+            white-space: normal; /* Override table cell nowrap */
+            pointer-events: none; /* Allows mouse events to pass through to elements beneath */
+        }
+
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            #feedback-table th, #feedback-table td {
+                padding: 8px;
+                font-size: 12px;
+            }
+            #filters {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .tab-button {
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+            /* Analysis table wrapper already responsive */
+            .analysis-table-wrapper {
+                margin: 0 -20px; /* Allow table to spill out of container padding */
+                width: calc(100% + 40px);
+            }
+            .analysis-table th, .analysis-table td {
+                 font-size: 10px;
+                 padding: 6px 8px;
+            }
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Golden Care Feedback Viewer</h1>
+
+    <!-- Login Section -->
+    <div id="login-section" class="container">
+        <h2>Login to View Feedback</h2>
+        <input type="email" id="email-input" placeholder="Email" required>
+        <input type="password" id="password-input" placeholder="Password" required>
+        <button id="login-button">Login</button>
+        <p id="login-error" style="color: red;"></p>
+    </div>
+
+    <!-- Viewer Section -->
+    <div id="viewer-section" class="container">
+        <div id="viewer-header">
+            <h3>Feedback Data</h3>
+            <button id="logout-button">Logout</button>
+        </div>
+
+        <div id="filters">
+            <label for="month-select">Month:</label>
+            <select id="month-select"></select>
+
+            <label for="year-select">Year:</label>
+            <select id="year-select"></select>
+        </div>
+
+        <div class="tab-container">
+            <button class="tab-button active" onclick="showTab('raw-data-tab', event)">Raw Data</button>
+            <button class="tab-button" onclick="showTab('analysis-tab', event)">Analysis</button>
+        </div>
+
+        <!-- Raw Data Tab Content -->
+        <div id="raw-data-tab" class="tab-content active">
+            <div id="loading-indicator">
+                <div class="spinner"></div> Loading feedback...
+            </div>
+            
+            <!-- NEW WRAPPER FOR SCROLLING -->
+            <div class="feedback-table-wrapper">
+                <table id="feedback-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Recommendation</th>
+                            <th>Care</th>
+                            <th>Satisfaction</th>
+                            <th>Comments</th> 
+                            <th>Phone Number</th>
+                            <th>Best Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedback-table-body">
+                        <tr><td colspan="7" style="text-align: center;">No feedback data found.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- END NEW WRAPPER -->
+        </div>
+
+        <!-- Analysis Tab Content -->
+        <div id="analysis-tab" class="tab-content">
+            <div id="analysis-loading-indicator" style="display:none; text-align:center; padding:20px; color:#888;">
+                <div class="spinner"></div> Generating analysis...
+            </div>
+
+            <!-- Recommendation Analysis -->
+            <div class="analysis-section">
+                <h4>Recommendation Score Analysis (NPS) - Monthly Trends</h4>
+                <div class="analysis-table-wrapper">
+                    <table id="recommendation-analysis-table" class="analysis-table">
+                        <thead>
+                            <tr></tr> <!-- Headers (Score, Months, Total) will be injected here -->
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-container">
+                    <canvas id="recommendation-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Care Analysis -->
+            <div class="analysis-section">
+                <h4>Care Rating Analysis - Monthly Trends</h4>
+                <div class="analysis-table-wrapper">
+                    <table id="care-analysis-table" class="analysis-table">
+                        <thead>
+                            <tr></tr> <!-- Headers (Rating, Months, Total) will be injected here -->
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-container">
+                    <canvas id="care-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Satisfaction Analysis -->
+            <div class="analysis-section">
+                <h4>Overall Satisfaction Analysis - Monthly Trends</h4>
+                <div class="analysis-table-wrapper">
+                    <table id="satisfaction-analysis-table" class="analysis-table">
+                        <thead>
+                            <tr></tr> <!-- Headers (Rating, Months, Total) will be injected here -->
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="chart-container">
+                    <canvas id="satisfaction-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Custom Tooltip Element -->
+    <div id="cell-tooltip"></div>
+
+    <script type="module">
+        // Import Firebase modules for v9 syntax
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // Your web app's Firebase configuration (MUST BE IDENTICAL TO index.html)
+        const firebaseConfig = {
+          apiKey: "AIzaSyA9Xny9hPIxbA-ZlMtFIufwa6KEduEDVXU",
+          authDomain: "feedback-gc2025.firebaseapp.com",
+          projectId: "feedback-gc2025",
+          storageBucket: "feedback-gc2025.firebasestorage.app",
+          messagingSenderId: "121481265924",
+          appId: "1:121481265924:web:730fa79ca0f09d376e4651",
+          measurementId: "G-7CZ56QYR8X"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // DOM Elements
+        const loginSection = document.getElementById('login-section');
+        const viewerSection = document.getElementById('viewer-section');
+        const emailInput = document.getElementById('email-input');
+        const passwordInput = document.getElementById('password-input');
+        const loginButton = document.getElementById('login-button');
+        const loginError = document.getElementById('login-error');
+        const logoutButton = document.getElementById('logout-button');
+        const monthSelect = document.getElementById('month-select');
+        const yearSelect = document.getElementById('year-select');
+        const feedbackTableBody = document.getElementById('feedback-table-body');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const analysisLoadingIndicator = document.getElementById('analysis-loading-indicator');
+        
+        // ADDED: Tooltip element
+        const cellTooltip = document.getElementById('cell-tooltip');
+        const feedbackTable = document.getElementById('feedback-table'); // Reference the whole table for event delegation
+
+
+        const MONTHS = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        let activeCharts = {}; // Store chart instances to destroy and recreate
+
+        // Color palettes for charts
+        const SCORE_COLORS = {
+            1: 'rgba(255, 99, 132, 0.7)',  // Red (Detractor)
+            2: 'rgba(255, 159, 64, 0.7)',  // Orange
+            3: 'rgba(255, 190, 60, 0.7)',  // Amber
+            4: 'rgba(255, 220, 80, 0.7)',  // Light Yellow
+            5: 'rgba(200, 230, 100, 0.7)', // Lighter Green
+            6: 'rgba(150, 200, 120, 0.7)', // Medium Green
+            7: 'rgba(100, 180, 140, 0.7)', // Teal Green (Passive)
+            8: 'rgba(75, 192, 192, 0.7)',  // Aqua (Passive)
+            9: 'rgba(54, 162, 235, 0.7)',  // Blue (Promoter)
+            10: 'rgba(0, 128, 0, 0.7)'     // Dark Green (Promoter)
+        };
+
+        const RATING_COLORS = {
+            'Very Dissatisfied': 'rgba(255, 99, 132, 0.7)',
+            'Dissatisfied': 'rgba(255, 159, 64, 0.7)',
+            'Neutral': 'rgba(255, 205, 86, 0.7)',
+            'Satisfied': 'rgba(75, 192, 192, 0.7)',
+            'Very Satisfied': 'rgba(54, 162, 235, 0.7)'
+        };
+
+
+        // --- Tab Switching Logic ---
+        window.showTab = function(tabId, event) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => button.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // --- Authentication Logic ---
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User is signed in
+                console.log("User logged in:", user.email);
+                loginSection.style.display = 'none';
+                viewerSection.style.display = 'block';
+                populateFilterDropdowns(); // Populate filters once logged in
+                loadFeedback(); // Load feedback data
+                showTab('raw-data-tab', {target: document.querySelector('.tab-button.active')}); // Default to Raw Data tab
+            } else {
+                // User is signed out
+                console.log("User logged out.");
+                loginSection.style.display = 'flex'; // Show login form
+                viewerSection.style.display = 'none';
+                loginError.textContent = ''; // Clear any previous errors
+            }
+        });
+
+        loginButton.addEventListener('click', async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            loginError.textContent = ''; // Clear previous errors
+
+            if (!email || !password) {
+                loginError.textContent = "Please enter both email and password.";
+                return;
+            }
+
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (error) {
+                console.error("Login error:", error.code, error.message);
+                loginError.textContent = `Login failed: ${error.message}`;
+            }
+        });
+
+        logoutButton.addEventListener('click', async () => {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Logout error:", error.message);
+                alert("Error logging out: " + error.message);
+            }
+        });
+
+        // --- Filter Dropdown Logic ---
+        function populateFilterDropdowns() {
+            // Populate Month Select
+            monthSelect.innerHTML = '<option value="all">All Months</option>';
+            MONTHS.forEach((month, index) => {
+                const option = document.createElement('option');
+                option.value = index + 1; // Month index + 1 (1-12)
+                option.textContent = month;
+                monthSelect.appendChild(option);
+            });
+
+            // Populate Year Select
+            const currentYear = new Date().getFullYear();
+            yearSelect.innerHTML = '<option value="all">All Years</option>';
+            for (let i = currentYear; i >= currentYear - 5; i--) { // Last 5 years + current
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = i;
+                yearSelect.appendChild(option);
+            }
+
+            // Set default selections to current month and year
+            monthSelect.value = new Date().getMonth() + 1; // Default to current month for raw data
+            yearSelect.value = currentYear; // Default to current year
+
+            // Add event listeners for filter changes
+            monthSelect.addEventListener('change', loadFeedback);
+            yearSelect.addEventListener('change', loadFeedback);
+        }
+
+        let allFeedbackForAnalysis = []; // Stores all data for the selected year (or all years) for analysis
+        let filteredFeedbackForRawData = []; // Stores data for the specific month/year for the raw data table
+
+        // --- Load Feedback Data Logic ---
+        async function loadFeedback() {
+            loadingIndicator.style.display = 'block';
+            analysisLoadingIndicator.style.display = 'block';
+            feedbackTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;"></td></tr>'; // Clear existing raw data table
+
+            const selectedMonth = monthSelect.value; // "all" or 1-12
+            const selectedYear = yearSelect.value;   // "all" or YYYY
+
+            // --- Query for Analysis Tab (Always based on Year only, month filter is ignored for analysis) ---
+            let analysisQuery = collection(db, 'feedback');
+            if (selectedYear !== 'all') {
+                const startOfYear = new Date(parseInt(selectedYear), 0, 1).toISOString();
+                const endOfYear = new Date(parseInt(selectedYear) + 1, 0, 1).toISOString();
+                analysisQuery = query(analysisQuery, where('timestamp', '>=', startOfYear), where('timestamp', '<', endOfYear));
+            }
+            analysisQuery = query(analysisQuery, orderBy('timestamp', 'asc')); // Order ascending for monthly trend
+
+            // --- Query for Raw Data Tab (Year + Month if selected) ---
+            let rawDataQuery = collection(db, 'feedback');
+            // Apply Year filter (for raw data too)
+            if (selectedYear !== 'all') {
+                const startOfYear = new Date(parseInt(selectedYear), 0, 1).toISOString();
+                const endOfYear = new Date(parseInt(selectedYear) + 1, 0, 1).toISOString();
+                rawDataQuery = query(rawDataQuery, where('timestamp', '>=', startOfYear), where('timestamp', '<', endOfYear));
+            }
+            // Apply Month filter (ONLY for raw data)
+            if (selectedMonth !== 'all') {
+                const monthIndex = parseInt(selectedMonth) - 1; // 0-11
+                const startOfMonth = new Date(parseInt(selectedYear), monthIndex, 1).toISOString();
+                const endOfMonth = new Date(parseInt(selectedYear), monthIndex + 1, 1).toISOString();
+                rawDataQuery = query(rawDataQuery, where('timestamp', '>=', startOfMonth), where('timestamp', '<', endOfMonth));
+            }
+            rawDataQuery = query(rawDataQuery, orderBy('timestamp', 'desc')); // Order by newest first for raw data
+
+            try {
+                // Fetch data for Analysis
+                const analysisSnapshot = await getDocs(analysisQuery);
+                allFeedbackForAnalysis = [];
+                analysisSnapshot.forEach((doc) => {
+                    allFeedbackForAnalysis.push({ id: doc.id, ...doc.data() });
+                });
+
+                // Fetch data for Raw Data Table
+                const rawDataSnapshot = await getDocs(rawDataQuery);
+                filteredFeedbackForRawData = [];
+                rawDataSnapshot.forEach((doc) => {
+                    filteredFeedbackForRawData.push({ id: doc.id, ...doc.data() });
+                });
+
+                renderFeedbackTable(filteredFeedbackForRawData);
+                renderAnalysis(allFeedbackForAnalysis); // Analysis uses the full year's data
+
+            } catch (error) {
+                console.error("Error loading feedback:", error);
+                feedbackTableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Error loading data: ${error.message}</td></tr>`;
+                // Clear analysis tables on error (colspan is 14 for Score/Rating + 12 Months + Total)
+                document.querySelector('#recommendation-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">Error loading analysis data.</td></tr>';
+                document.querySelector('#recommendation-analysis-table thead tr').innerHTML = ''; // Clear header
+                document.querySelector('#care-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">Error loading analysis data.</td></tr>';
+                document.querySelector('#care-analysis-table thead tr').innerHTML = '';
+                document.querySelector('#satisfaction-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">Error loading analysis data.</td></tr>';
+                document.querySelector('#satisfaction-analysis-table thead tr').innerHTML = '';
+
+                // Clear charts too
+                renderStackedBarChart('recommendation-chart', [], [], 'Recommendation Scores Distribution');
+                renderStackedBarChart('care-chart', [], [], 'Care Ratings Distribution');
+                renderStackedBarChart('satisfaction-chart', [], [], 'Overall Satisfaction Distribution');
+
+            } finally {
+                loadingIndicator.style.display = 'none';
+                analysisLoadingIndicator.style.display = 'none';
+            }
+        }
+
+        function renderFeedbackTable(data) {
+            feedbackTableBody.innerHTML = ''; // Clear current table content
+            if (data.length === 0) {
+                feedbackTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">No feedback data found for the selected filters.</td></tr>';
+                return;
+            }
+
+            data.forEach(item => {
+                const row = feedbackTableBody.insertRow();
+                
+                // Format Date
+                const date = new Date(item.timestamp);
+                const formattedDate = date.toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+
+                row.insertCell().textContent = formattedDate;
+                row.insertCell().textContent = item.recommendation || 'N/A';
+                row.insertCell().textContent = item.care || 'N/A';
+                row.insertCell().textContent = item.satisfaction || 'N/A';
+                row.insertCell().textContent = item.comments || 'N/A';
+                row.insertCell().textContent = item.phoneNumber || 'N/A';
+                row.insertCell().textContent = item.bestTime || 'N/A';
+            });
+        }
+
+        // --- Analysis Functions ---
+        function renderAnalysis(data) {
+            // Destroy previous chart instances
+            for (const chartId in activeCharts) {
+                if (activeCharts[chartId]) {
+                    activeCharts[chartId].destroy();
+                }
+            }
+            activeCharts = {}; // Reset active charts
+
+            // Clear previous table headers and bodies
+            document.querySelector('#recommendation-analysis-table tbody').innerHTML = '';
+            document.querySelector('#recommendation-analysis-table thead tr').innerHTML = '';
+            document.querySelector('#care-analysis-table tbody').innerHTML = '';
+            document.querySelector('#care-analysis-table thead tr').innerHTML = '';
+            document.querySelector('#satisfaction-analysis-table tbody').innerHTML = '';
+            document.querySelector('#satisfaction-analysis-table thead tr').innerHTML = '';
+
+
+            if (data.length === 0) {
+                document.querySelector('#recommendation-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">No data for analysis.</td></tr>';
+                document.querySelector('#care-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">No data for analysis.</td></tr>';
+                document.querySelector('#satisfaction-analysis-table tbody').innerHTML = '<tr><td colspan="14" style="text-align: center;">No data for analysis.</td></tr>';
+                // Clear charts too
+                renderStackedBarChart('recommendation-chart', [], [], 'Recommendation Scores Distribution');
+                renderStackedBarChart('care-chart', [], [], 'Care Ratings Distribution');
+                renderStackedBarChart('satisfaction-chart', [], [], 'Overall Satisfaction Distribution');
+                return;
+            }
+
+            processRecommendationData(data);
+            // Pass a flag for whether to include NPS summary rows
+            processRatingData(data, 'care', 'Care Rating Analysis', 'care-analysis-table', 'care-chart', false); // No NPS for Care
+            processRatingData(data, 'satisfaction', 'Overall Satisfaction Analysis', 'satisfaction-analysis-table', 'satisfaction-chart', true); // NPS for Satisfaction
+        }
+
+        function processRecommendationData(data) {
+            const monthlyStats = {};
+            MONTHS.forEach((month, index) => {
+                monthlyStats[month] = {
+                    counts: Array(11).fill(0), // index 0 unused, 1-10 for scores
+                    total: 0,
+                    promoters: 0, // 9-10
+                    detractors: 0, // 1-6
+                    passives: 0   // 7-8
+                };
+            });
+
+            // Aggregate data by month
+            data.forEach(item => {
+                const date = new Date(item.timestamp);
+                const monthName = MONTHS[date.getMonth()];
+                const recommendation = parseInt(item.recommendation); // Ensure it's an integer
+
+                if (monthlyStats[monthName] && !isNaN(recommendation) && recommendation >= 1 && recommendation <= 10) {
+                    monthlyStats[monthName].counts[recommendation]++;
+                    monthlyStats[monthName].total++;
+
+                    if (recommendation >= 9) monthlyStats[monthName].promoters++;
+                    else if (recommendation >= 7) monthlyStats[monthName].passives++;
+                    else if (recommendation >= 1) monthlyStats[monthName].detractors++;
+                }
+            });
+
+            // Calculate percentages and NPS for each month and overall total
+            const grandTotalStats = {
+                counts: Array(11).fill(0),
+                total: 0,
+                promoters: 0,
+                detractors: 0,
+                passives: 0
+            };
+
+            MONTHS.forEach(monthName => {
+                const stats = monthlyStats[monthName];
+                // Accumulate grand total
+                stats.counts.forEach((count, i) => grandTotalStats.counts[i] += count);
+                grandTotalStats.total += stats.total;
+                grandTotalStats.promoters += stats.promoters;
+                grandTotalStats.detractors += stats.detractors;
+                grandTotalStats.passives += stats.passives;
+
+                // Calculate percentages for each month
+                stats.promoterPercentage = stats.total > 0 ? (stats.promoters / stats.total) * 100 : 0;
+                stats.detractorPercentage = stats.total > 0 ? (stats.detractors / stats.total) * 100 : 0;
+                stats.npsScore = stats.promoterPercentage - stats.detractorPercentage;
+            });
+
+            // Calculate grand total percentages
+            grandTotalStats.promoterPercentage = grandTotalStats.total > 0 ? (grandTotalStats.promoters / grandTotalStats.total) * 100 : 0;
+            grandTotalStats.detractorPercentage = grandTotalStats.total > 0 ? (grandTotalStats.detractors / grandTotalStats.total) * 100 : 0;
+            grandTotalStats.npsScore = grandTotalStats.promoterPercentage - grandTotalStats.detractorPercentage;
+            monthlyStats['Total'] = grandTotalStats; // Add total column to monthlyStats for rendering
+
+            // --- Render Table ---
+            const tbody = document.querySelector('#recommendation-analysis-table tbody');
+            const thead = document.querySelector('#recommendation-analysis-table thead tr');
+            tbody.innerHTML = ''; // Clear existing table data
+            thead.innerHTML = ''; // Clear existing headers
+
+            // Table Headers
+            thead.insertCell().textContent = 'Score'; // First column header
+            MONTHS.forEach(month => {
+                thead.insertCell().textContent = month;
+            });
+            thead.insertCell().textContent = 'Total'; // Last column header
+
+            // Rows for individual scores (1-10)
+            for (let i = 1; i <= 10; i++) {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = i; // Score label
+                MONTHS.forEach(month => {
+                    const percentage = monthlyStats[month].total > 0 ? (monthlyStats[month].counts[i] / monthlyStats[month].total) * 100 : 0;
+                    row.insertCell().textContent = percentage.toFixed(1) + '%';
+                });
+                const totalPercentage = grandTotalStats.total > 0 ? (grandTotalStats.counts[i] / grandTotalStats.total) * 100 : 0;
+                row.insertCell().textContent = totalPercentage.toFixed(1) + '%';
+            }
+
+            // Summary rows (Promoter, Detractor, NPS)
+            const summaryRows = [
+                { label: 'Promoter % (9-10)', valueFn: (stats) => stats.promoterPercentage, target: 75, type: 'promoter' },
+                { label: 'Detractor % (1-6)', valueFn: (stats) => stats.detractorPercentage, target: 5, type: 'detractor' },
+                { label: 'NPS Score', valueFn: (stats) => stats.npsScore, target: 70, type: 'nps' }
+            ];
+
+            summaryRows.forEach(summary => {
+                const row = tbody.insertRow();
+                const cellLabel = row.insertCell();
+                cellLabel.textContent = summary.label;
+                cellLabel.style.fontWeight = 'bold'; // Make label bold
+                
+                MONTHS.forEach(month => {
+                    const cell = row.insertCell();
+                    const value = summary.valueFn(monthlyStats[month]);
+                    cell.textContent = value.toFixed(1) + '%';
+                    // Apply highlighting based on criteria for monthly values
+                    if (summary.type === 'promoter' && value >= summary.target) cell.classList.add('highlight-green');
+                    else if (summary.type === 'detractor' && value < summary.target) cell.classList.add('highlight-green');
+                    else if (summary.type === 'detractor' && value >= summary.target) cell.classList.add('highlight-red');
+                    else if (summary.type === 'nps' && value >= summary.target) cell.classList.add('highlight-green');
+                    else if (summary.type === 'nps' && value < 0) cell.classList.add('highlight-red');
+                });
+
+                // Total column
+                const totalCell = row.insertCell();
+                const totalValue = summary.valueFn(monthlyStats['Total']);
+                totalCell.textContent = totalValue.toFixed(1) + '%';
+                // Apply highlighting for total values
+                if (summary.type === 'promoter' && totalValue >= summary.target) totalCell.classList.add('highlight-green');
+                else if (summary.type === 'detractor' && totalValue < summary.target) totalCell.classList.add('highlight-green');
+                else if (summary.type === 'detractor' && totalValue >= summary.target) totalCell.classList.add('highlight-red');
+                else if (summary.type === 'nps' && totalValue >= summary.target) totalCell.classList.add('highlight-green');
+                else if (summary.type === 'nps' && totalValue < 0) totalCell.classList.add('highlight-red');
+            });
+
+            // --- Render Chart ---
+            const chartLabels = MONTHS;
+            const datasets = [];
+
+            for (let i = 1; i <= 10; i++) {
+                datasets.push({
+                    label: `Score ${i}`,
+                    data: MONTHS.map(month => {
+                        const stats = monthlyStats[month];
+                        return stats.total > 0 ? (stats.counts[i] / stats.total) * 100 : 0; // Data as percentage
+                    }),
+                    backgroundColor: SCORE_COLORS[i],
+                    borderColor: SCORE_COLORS[i].replace('0.7', '1'), // Solid border for consistency
+                    borderWidth: 1
+                });
+            }
+
+            renderStackedBarChart('recommendation-chart', chartLabels, datasets, 'Monthly Recommendation Scores Distribution');
+        }
+
+        function processRatingData(data, fieldName, title, tableId, chartId, includeNPS = true) {
+            const ratingOrder = ['Very Dissatisfied', 'Dissatisfied', 'Neutral', 'Satisfied', 'Very Satisfied'];
+            const monthlyStats = {};
+            MONTHS.forEach((month, index) => {
+                monthlyStats[month] = {
+                    counts: {}, // e.g., {'Very Dissatisfied': 0, ...}
+                    total: 0
+                };
+                ratingOrder.forEach(rating => monthlyStats[month].counts[rating] = 0);
+            });
+
+            // Aggregate data by month
+            data.forEach(item => {
+                const date = new Date(item.timestamp);
+                const monthName = MONTHS[date.getMonth()];
+                const rating = item[fieldName];
+
+                if (monthlyStats[monthName] && ratingOrder.includes(rating)) {
+                    monthlyStats[monthName].counts[rating]++;
+                    monthlyStats[monthName].total++;
+                }
+            });
+
+            // Calculate percentages for each month and overall total
+            const grandTotalStats = {
+                counts: {},
+                total: 0
+            };
+            ratingOrder.forEach(rating => grandTotalStats.counts[rating] = 0);
+
+            MONTHS.forEach(monthName => {
+                const stats = monthlyStats[monthName];
+                // Accumulate grand total
+                Object.keys(stats.counts).forEach(rating => grandTotalStats.counts[rating] += stats.counts[rating]);
+                grandTotalStats.total += stats.total;
+
+                // Calculate percentages for each month
+                stats.promoters = (stats.counts['Satisfied'] || 0) + (stats.counts['Very Satisfied'] || 0);
+                stats.detractors = (stats.counts['Very Dissatisfied'] || 0) + (stats.counts['Dissatisfied'] || 0);
+                stats.promoterPercentage = stats.total > 0 ? (stats.promoters / stats.total) * 100 : 0;
+                stats.detractorPercentage = stats.total > 0 ? (stats.detractors / stats.total) * 100 : 0;
+                stats.npsScore = stats.promoterPercentage - stats.detractorPercentage; // NPS logic for satisfaction
+            });
+            
+            // Calculate grand total percentages
+            grandTotalStats.promoters = (grandTotalStats.counts['Satisfied'] || 0) + (grandTotalStats.counts['Very Satisfied'] || 0);
+            grandTotalStats.detractors = (grandTotalStats.counts['Very Dissatisfied'] || 0) + (grandTotalStats.counts['Dissatisfied'] || 0);
+            grandTotalStats.promoterPercentage = grandTotalStats.total > 0 ? (grandTotalStats.promoters / grandTotalStats.total) * 100 : 0;
+            grandTotalStats.detractorPercentage = grandTotalStats.total > 0 ? (grandTotalStats.detractors / grandTotalStats.total) * 100 : 0;
+            grandTotalStats.npsScore = grandTotalStats.promoterPercentage - grandTotalStats.detractorPercentage;
+
+            monthlyStats['Total'] = grandTotalStats; // Add total column for rendering
+
+            // --- Render Table ---
+            const tbody = document.querySelector(`#${tableId} tbody`);
+            const thead = document.querySelector(`#${tableId} thead tr`);
+            tbody.innerHTML = '';
+            thead.innerHTML = '';
+
+            // Table Headers
+            thead.insertCell().textContent = 'Rating';
+            MONTHS.forEach(month => {
+                thead.insertCell().textContent = month;
+            });
+            thead.insertCell().textContent = 'Total';
+
+            // Rows for individual ratings
+            ratingOrder.forEach(rating => {
+                const row = tbody.insertRow();
+                row.insertCell().textContent = rating;
+                MONTHS.forEach(month => {
+                    const percentage = monthlyStats[month].total > 0 ? (monthlyStats[month].counts[rating] / monthlyStats[month].total) * 100 : 0;
+                    row.insertCell().textContent = percentage.toFixed(1) + '%';
+                });
+                const totalPercentage = grandTotalStats.total > 0 ? (grandTotalStats.counts[rating] / grandTotalStats.total) * 100 : 0;
+                row.insertCell().textContent = totalPercentage.toFixed(1) + '%';
+            });
+
+            // Conditionally add summary rows based on 'includeNPS' flag
+            if (includeNPS) {
+                // Summary rows (Promoter, Detractor, NPS)
+                const summaryRows = [
+                    { label: 'Promoters (%)', valueFn: (stats) => stats.promoterPercentage, target: 75, type: 'promoter' },
+                    { label: 'Detractors (%)', valueFn: (stats) => stats.detractorPercentage, target: 5, type: 'detractor' },
+                    { label: 'NPS Score', valueFn: (stats) => stats.npsScore, target: 70, type: 'nps' }
+                ];
+
+                summaryRows.forEach(summary => {
+                    const row = tbody.insertRow();
+                    const cellLabel = row.insertCell();
+                    cellLabel.textContent = summary.label;
+                    cellLabel.style.fontWeight = 'bold';
+                    
+                    MONTHS.forEach(month => {
+                        const cell = row.insertCell();
+                        const value = summary.valueFn(monthlyStats[month]);
+                        cell.textContent = value.toFixed(1) + '%';
+                        // Apply highlighting
+                        if (summary.type === 'promoter' && value >= summary.target) cell.classList.add('highlight-green');
+                        else if (summary.type === 'detractor' && value < summary.target) cell.classList.add('highlight-green');
+                        else if (summary.type === 'detractor' && value >= summary.target) cell.classList.add('highlight-red');
+                        else if (summary.type === 'nps' && value >= summary.target) cell.classList.add('highlight-green');
+                        else if (summary.type === 'nps' && value < 0) cell.classList.add('highlight-red');
+                    });
+                    
+                    const totalCell = row.insertCell();
+                    const totalValue = summary.valueFn(monthlyStats['Total']);
+                    totalCell.textContent = totalValue.toFixed(1) + '%';
+                    if (summary.type === 'promoter' && totalValue >= summary.target) totalCell.classList.add('highlight-green');
+                    else if (summary.type === 'detractor' && totalValue < summary.target) totalCell.classList.add('highlight-green');
+                    else if (summary.type === 'detractor' && totalValue >= summary.target) totalCell.classList.add('highlight-red');
+                    else if (summary.type === 'nps' && totalValue >= summary.target) totalCell.classList.add('highlight-green');
+                    else if (summary.type === 'nps' && totalValue < 0) totalCell.classList.add('highlight-red');
+                });
+            }
+
+            // --- Render Chart ---
+            const chartLabels = MONTHS;
+            const datasets = [];
+
+            ratingOrder.forEach(rating => {
+                datasets.push({
+                    label: rating,
+                    data: MONTHS.map(month => {
+                        const stats = monthlyStats[month];
+                        return stats.total > 0 ? (stats.counts[rating] / stats.total) * 100 : 0;
+                    }),
+                    backgroundColor: RATING_COLORS[rating],
+                    borderColor: RATING_COLORS[rating].replace('0.7', '1'),
+                    borderWidth: 1
+                });
+            });
+
+            renderStackedBarChart(chartId, chartLabels, datasets, title + ' Distribution');
+        }
+
+        // Reusable function to create a stacked bar chart
+        function renderStackedBarChart(canvasId, labels, datasets, chartTitle) {
+            const ctx = document.getElementById(canvasId);
+
+            // Destroy existing chart instance if it exists
+            if (activeCharts[canvasId]) {
+                activeCharts[canvasId].destroy();
+            }
+
+            activeCharts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels, // e.g., ['January', 'February', ...]
+                    datasets: datasets // Array of { label: '1', data: [countJan, countFeb, ...], backgroundColor: ... }
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: chartTitle,
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            display: true, // Show legend for stacked bars
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 20 // Adjust legend box size if needed
+                            }
+                        },
+                        tooltip: { // Customize tooltip to show percentage
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(1) + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: { display: true, text: 'Month' }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: { display: true, text: 'Percentage' },
+                            max: 100, // For percentage based stacked chart
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // --- Cell Tooltip Logic ---
+        function showCellTooltip(event) {
+            let target = event.target;
+
+            // Traverse up to find the <td> element
+            // Stop if we hit the table itself or document body
+            while (target && target.tagName !== 'TD' && target !== feedbackTable) {
+                target = target.parentNode;
+            }
+
+            if (target && target.tagName === 'TD') {
+                const cellContent = target.textContent.trim();
+                if (cellContent === '' || cellContent === 'N/A') { // Don't show tooltip for empty or N/A cells
+                    hideCellTooltip();
+                    return;
+                }
+                
+                cellTooltip.innerHTML = cellContent;
+                cellTooltip.style.display = 'block';
+
+                // Position the tooltip
+                const rect = target.getBoundingClientRect();
+                
+                // Calculate tooltip position relative to the viewport
+                let tooltipX = rect.left + window.scrollX;
+                let tooltipY = rect.bottom + window.scrollY + 5; // 5px below the cell
+
+                // Get current viewport width/height
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+
+                // Adjust if tooltip goes off screen to the right
+                if (tooltipX + cellTooltip.offsetWidth > viewportWidth + window.scrollX) {
+                    tooltipX = (viewportWidth + window.scrollX) - cellTooltip.offsetWidth - 10; // 10px padding from right
+                    if (tooltipX < window.scrollX) tooltipX = window.scrollX + 10; // Ensure it's not off-screen left
+                }
+
+                // Adjust if tooltip goes off screen to the bottom
+                if (tooltipY + cellTooltip.offsetHeight > viewportHeight + window.scrollY) {
+                    tooltipY = rect.top + window.scrollY - cellTooltip.offsetHeight - 5; // 5px above the cell
+                    if (tooltipY < window.scrollY) { // If it still goes off screen to top (unlikely, but fallback)
+                        tooltipY = window.scrollY + 10;
+                    }
+                }
+                
+                cellTooltip.style.left = `${tooltipX}px`;
+                cellTooltip.style.top = `${tooltipY}px`;
+            }
+        }
+
+        function hideCellTooltip() {
+            cellTooltip.style.display = 'none';
+        }
+
+        // Attach event listeners using delegation to the whole table
+        // This is efficient as it doesn't add a listener to every <td>
+        feedbackTable.addEventListener('mouseover', showCellTooltip);
+        feedbackTable.addEventListener('mouseout', hideCellTooltip);
+        // Important: Re-attach these listeners after `loadFeedback()` if `feedbackTableBody` content is replaced.
+        // In this setup, feedbackTableBody is targeted but the listeners are on feedbackTable, so they persist.
+    </script>
+</body>
+</html>
