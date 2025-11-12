@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,16 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Golden Care Feedback</title>
     
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
-    <!-- 
-        Firebase SDKs - v9 Modular syntax via CDN
-        IMPORTANT: When using <script type="module"> and 'import' statements,
-        DO NOT include separate <script src="..."> tags for firebase-app.js, firebase-firestore.js, etc.
-        The 'import' statements inside the module script handle loading these.
-        Removing the redundant direct script tags to prevent module conflicts.
-    -->
     
     <style>
         /* --- General Body & Root Styles --- */
@@ -42,7 +32,6 @@
         }
         .golden-text {
             color: #e67e22; /* Golden Care Orange */
-            /* Add some shadow for depth if desired */
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); 
         }
         .care-text {
@@ -55,28 +44,28 @@
             background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, rgba(240,240,240,0.5) 100%);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); /* Stronger shadow for pop-out effect */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             text-align: center;
             max-width: 600px;
             width: 100%;
-            position: absolute; /* Positioned absolutely over the image background */
+            position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            z-index: 10; /* Ensure form is above the image background */
-            max-height: 90vh; /* Prevent container from being too tall on small screens */
-            overflow-y: auto; /* Enable scrolling for the form if it exceeds height */
-            backdrop-filter: blur(8px); /* Add a more noticeable blur behind the form for better readability */
-            -webkit-backdrop-filter: blur(8px); /* Safari support */
-            position: relative; /* Needed for positioning the viewer-link inside */
+            z-index: 10;
+            max-height: 90vh;
+            overflow-y: auto;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            position: relative;
         }
 
         /* Headings Styles */
         .feedback-container h2 {
-            color: #555; /* Muted grey for a sub-heading */
+            color: #555;
             text-align: center;
             margin-top: 0; 
-            margin-bottom: 25px; 
+            margin-bottom: 10px; /* Reduced margin to bring disclaimer closer */
             font-size: 22px; 
         }
 
@@ -98,7 +87,7 @@
             color: #333; 
         }
 
-        /* Rating Section Styles (for both number and emoji ratings) */
+        /* Rating Section Styles */
         .feedback-container .rating {
             display: flex;
             justify-content: space-between;
@@ -109,8 +98,7 @@
         .feedback-container .rating input {
             display: none; 
         }
-        /* Specific label styles for emoji ratings */
-        .feedback-container .rating.emoji-rating label { /* Added a class for distinction */
+        .feedback-container .rating.emoji-rating label {
             font-size: 36px; 
             cursor: pointer;
             padding: 5px; 
@@ -124,19 +112,18 @@
         .feedback-container .rating.emoji-rating input:checked + label {
             border: 2px solid #e67e22; 
             border-radius: 5px;
-            background-color: #fffaf0; /* Keep this for emoji, which is a light cream */
+            background-color: #fffaf0;
         }
 
-        /* Number Box Styles (for 1-10 rating scale) */
+        /* Number Box Styles */
         .feedback-container .number-box {
-            display: inline-flex; /* Use inline-flex for proper sizing in a flex container */
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             width: 45px; 
             height: 45px;
             border-radius: 5px; 
             margin: 2px; 
-            /* Removed default border/shadow/transition from .number-box itself */
         }
         .feedback-container .number-box label {
             font-size: 18px; 
@@ -150,27 +137,24 @@
             height: 100%;
             cursor: pointer; 
             border-radius: 5px; 
-            border: 1px solid #ccc; /* Default border for the label */
-            box-shadow: 0 0 3px rgba(0, 0, 0, 0.1); /* Subtle default shadow */
-            box-sizing: border-box; /* Include padding and border in the element's total width and height */
-            transition: all 0.2s ease-in-out; /* Smooth transitions for hover/checked states */
+            border: 1px solid #ccc;
+            box-shadow: 0 0 3px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box; 
+            transition: all 0.2s ease-in-out; 
         }
-        /* Hover style for the label */
         .feedback-container .number-box label:hover {
             border-color: #e67e22; 
-            box-shadow: 0 0 8px rgba(230, 126, 34, 0.4); /* Stronger shadow on hover */
+            box-shadow: 0 0 8px rgba(230, 126, 34, 0.4);
         }
-
-        /* Style for selected number boxes - apply to the label itself */
         .feedback-container .number-box input:checked + label {
-            background-color: white; /* Changed to white background */
-            color: #e67e22; /* Changed text color to golden orange */
-            border: 2px solid #e67e22; /* Changed border color to golden orange */
+            background-color: white; 
+            color: #e67e22; 
+            border: 2px solid #e67e22; 
             border-radius: 5px;
-            box-shadow: 0 0 12px rgba(230, 126, 34, 0.7); /* Even stronger shadow for checked state */
+            box-shadow: 0 0 12px rgba(230, 126, 34, 0.7); 
         }
 
-        /* Submit Button Styles (now for the final form submission) */
+        /* Submit Button Styles */
         .feedback-container .button {
             background-color: #e67e22; 
             color: white;
@@ -200,26 +184,23 @@
             box-shadow: none;
         }
 
-        /* --- New Comment & Contact Info Section Styles --- */
+        /* Comment & Contact Info Section Styles */
         #commentAndContactSection {
             margin-top: 30px;
             padding-top: 20px;
-            border-top: 1px solid #eee; /* Separator line */
+            border-top: 1px solid #eee;
             text-align: left;
-            /* Removed display: none; - this section is always visible now */
         }
-        /* No specific #commentAndContactSection #commentMessage rule here,
-           relying on .question class for styling. */
         #commentAndContactSection label {
             font-weight: 600;
             margin-bottom: 5px;
             display: block; 
             color: #333;
-            margin-top: 15px; /* Spacing for labels */
+            margin-top: 15px;
         }
         #commentAndContactSection textarea,
         #commentAndContactSection input[type="text"] {
-            width: calc(100% - 20px); /* Account for padding */
+            width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
@@ -228,11 +209,10 @@
             box-sizing: border-box; 
         }
         #commentAndContactSection textarea {
-            min-height: 80px; /* Minimum height for textarea */
-            resize: vertical; /* Allow vertical resizing */
+            min-height: 80px;
+            resize: vertical;
         }
         
-        /* Style for the nested contactInfo div */
         #contactInfo {
             margin-top: 30px;
             padding-top: 20px;
@@ -242,119 +222,69 @@
             display: none;
         }
 
-
-        /* --- Viewer Link Styles (Icon) --- */
-        .viewer-link {
-            position: absolute;
-            top: 15px; /* Adjust as needed */
-            right: 15px; /* Adjust as needed */
-            background-color: #e67e22;
-            color: white;
-            width: 40px; /* Make it a square for the icon */
-            height: 40px;
-            border-radius: 50%; /* Make it a circle */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-decoration: none;
-            font-size: 1.2em; /* Size of the icon */
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 11; /* Ensure it's above other content if necessary */
-        }
-        .viewer-link:hover {
-            background-color: #d35400;
-            transform: translateY(-2px) scale(1.05);
-        }
-        .viewer-link:active {
-            transform: translateY(0) scale(1);
+        /* Disclaimer Text Style */
+        .disclaimer-text {
+            font-size: 13px; /* Slightly larger for readability */
+            color: #777;
+            margin-bottom: 25px; /* Space between disclaimer and first question */
+            text-align: center;
+            font-style: italic;
         }
 
-
-        /* --- Full-page Image Background Styles --- */
+        /* Full-page Image Background Styles */
         #background-image-container { 
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 1; /* Behind the feedback form */
+            z-index: 1;
             background-image: url('https://i.imgur.com/Jnnnetb.png'); 
-            background-size: cover; /* Ensures the image covers the entire container */
-            background-position: center; /* Centers the image */
-            background-repeat: no-repeat; /* Prevents image repetition */
+            background-size: cover; 
+            background-position: center; 
+            background-repeat: no-repeat; 
         }
 
-        /* --- Responsive Adjustments --- */
+        /* Responsive Adjustments */
         @media (max-width: 480px) {
             .feedback-container {
                 padding: 20px;
-                border-radius: 5px;
                 margin: 10px; 
                 width: calc(100% - 20px); 
-                padding-bottom: 20px; 
             }
-            .app-title {
-                font-size: 2.2em;
-            }
-            .feedback-container h2 {
-                font-size: 20px; 
-                margin-bottom: 20px;
-            }
-            .feedback-container .question {
-                font-size: 16px;
-                padding-left: 5px;
-            }
-            .feedback-container .rating {
-                justify-content: center; 
-            }
-            .feedback-container .rating.emoji-rating label {
-                font-size: 30px; 
-            }
-            .feedback-container .number-box {
-                width: 40px;
-                height: 40px;
-            }
-            .feedback-container .number-box label {
-                font-size: 16px;
-            }
-            .feedback-container .button {
-                padding: 12px 20px;
-                font-size: 15px;
-            }
+            .app-title { font-size: 2.2em; }
+            .feedback-container h2 { font-size: 20px; }
+            .feedback-container .question { font-size: 16px; }
+            .feedback-container .rating { justify-content: center; }
+            .feedback-container .rating.emoji-rating label { font-size: 30px; }
+            .feedback-container .number-box { width: 40px; height: 40px; }
+            .feedback-container .number-box label { font-size: 16px; }
+            .feedback-container .button { padding: 12px 20px; font-size: 15px; }
             #commentAndContactSection textarea,
             #commentAndContactSection input[type="text"] {
-                width: calc(100% - 10px); /* Adjust for smaller padding if needed */
+                width: calc(100% - 10px); 
                 padding: 8px;
-            }
-            .viewer-link {
-                top: 10px;
-                right: 10px;
-                width: 35px;
-                height: 35px;
-                font-size: 1em;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Container for the static image background -->
     <div id="background-image-container"></div>
 
-    <!-- Feedback Form -->
     <div class="feedback-container">
         <div class="app-title">
             <span class="golden-text">Golden</span><span class="care-text">Care</span>
         </div>
-        <a href="Viewer.html" class="viewer-link" title="View Feedback">
-            <i class="fas fa-file-alt"></i> <!-- Font Awesome document icon -->
-        </a>
+        
         <h2>Feedback Form</h2>
+        <!-- MOVED: Disclaimer is now here -->
+        <p class="disclaimer-text">
+            This is an autonomous feedback form. Your submission is anonymous unless you voluntarily provide your contact information.
+        </p>
+
         <form id="feedbackForm">
             <p class="question">1. On a scale of 1-10, how likely are you to recommend Golden Care to a friend or family member?</p>
             <div class="rating">
-                <!-- Corrected HTML structure for number boxes: input as sibling to label -->
                 <div class="number-box"><input type="radio" id="rating1" name="recommendation" value="1" required><label for="rating1">1</label></div>
                 <div class="number-box"><input type="radio" id="rating2" name="recommendation" value="2" required><label for="rating2">2</label></div>
                 <div class="number-box"><input type="radio" id="rating3" name="recommendation" value="3" required><label for="rating3">3</label></div>
@@ -385,34 +315,30 @@
                 <input type="radio" id="satisfaction5" name="satisfaction" value="Very Satisfied" required><label for="satisfaction5">😃</label>
             </div>
 
-            <!-- New Comment & Optional Contact Info Section -->
-            <div id="commentAndContactSection"> <!-- Always visible now -->
-                <!-- This p tag will dynamically get the bolded question text from JS -->
+            <div id="commentAndContactSection">
                 <p id="commentMessage" class="question">What's the primary reason for your score?</p> 
-                <label for="commentsTextarea"></label> <!-- Label remains empty, as per previous instruction -->
-                <textarea id="commentsTextarea" rows="4" required></textarea> <!-- Always required now -->
+                <label for="commentsTextarea"></label>
+                <textarea id="commentsTextarea" rows="4" required></textarea>
 
                 <div id="contactInfo" class="hidden">
-                    <p>We are sorry to hear that our service hasn't met your expectations. We would love the opportunity to learn more from this situation to help us do better next time. If you're open to a discussion, please share your phone number and the best time to reach you and our team will contact you to discuss.</p>
+                    <p>We are sorry to hear that our service hasn't met your expectations. We would love the opportunity to learn more from this situation to help us do better next time. If you're open to a discussion, please share your details below.</p>
+                    
                     <label for="phoneNumber">Phone Number:</label>
                     <input type="text" id="phoneNumber" name="phoneNumber" placeholder="Enter your phone number">
                     
-                    <label for="bestTime">Best Time to Contact:</label>
-                    <input type="text" id="bestTime" name="bestTime" placeholder="Enter the best time to reach you">
+                    <label id="nameLabel" for="nameInput">Your Name:</label>
+                    <input type="text" id="nameInput" name="nameInput" placeholder="Enter your name (optional)">
                 </div>
                 
-                <!-- This is now the ONE submit button for the entire form -->
                 <button type="submit" id="finalSubmitButton" class="button">Submit Feedback</button>
             </div>
         </form>
     </div>
 
     <script type="module"> 
-        // Import Firebase modules for v9 syntax
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
           apiKey: "AIzaSyA9Xny9hPIxbA-ZlMtFIufwa6KEduEDVXU",
           authDomain: "feedback-gc2025.firebaseapp.com",
@@ -423,166 +349,119 @@
           measurementId: "G-7CZ56QYR8X"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); // Get Firestore instance
+        const db = getFirestore(app);
         
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM fully loaded and parsed');
-
             const feedbackForm = document.getElementById('feedbackForm');
             const commentsTextarea = document.getElementById('commentsTextarea');
             const contactInfoDiv = document.getElementById('contactInfo');
             const phoneNumberInput = document.getElementById('phoneNumber');
-            const bestTimeInput = document.getElementById('bestTime');
+            const nameInput = document.getElementById('nameInput');
+            const nameLabel = document.getElementById('nameLabel');
             const finalSubmitButton = document.getElementById('finalSubmitButton');
-            const commentMessage = document.getElementById('commentMessage'); // This is the <p class="question"> tag
-            // const commentAndContactSection = document.getElementById('commentAndContactSection'); // No longer needed for display toggle
+            const commentMessage = document.getElementById('commentMessage'); 
 
-            // Select all radio buttons relevant to feedback evaluation
-            const recommendationRadios = document.querySelectorAll('input[name="recommendation"]');
-            const careRadios = document.querySelectorAll('input[name="care"]');
-            const satisfactionRadios = document.querySelectorAll('input[name="satisfaction"]');
+            const allRadios = document.querySelectorAll('input[type="radio"]');
 
-
-            // Function to update the dynamic sections (comment box question/placeholder and contact info visibility)
             function updateDynamicSections() {
                 const recommendationValue = document.querySelector('input[name="recommendation"]:checked')?.value;
-                const careValue = document.querySelector('input[name="care"]:checked')?.value;
-                const satisfactionValue = document.querySelector('input[name="satisfaction"]:checked')?.value;
 
-                // --- Logic for Comment Message and Textarea ---
                 let baseQuestion = "What's the primary reason for your score?";
                 let specificQuestionPart = "";
-                let placeholderSpecific = "Please tell us more..."; // Default placeholder for the textarea
+                let placeholderSpecific = "Please tell us more..."; 
 
                 if (recommendationValue) {
                     const recNum = parseInt(recommendationValue);
 
-                    if (recNum >= 9) { // Promoters
+                    if (recNum >= 9) {
                         specificQuestionPart = " What do you love most about us?";
                         placeholderSpecific = "E.g., What did you like about our service, staff, or experience?";
-                    } else if (recNum >= 7 && recNum <= 8) { // Passives
+                    } else if (recNum === 8 || recNum === 7) { // Changed to include 7 here
                         specificQuestionPart = " What could we do better?";
                         placeholderSpecific = "E.g., How can we improve our service or your experience?";
-                    } else { // Detractors (0-6 scale)
+                    } else { // Detractors (1-6)
                         specificQuestionPart = " What caused you to give that score?";
                         placeholderSpecific = "E.g., What went wrong, or what were your concerns?";
                     }
                 }
-                // The comment section is always visible now.
-                commentMessage.textContent = baseQuestion + specificQuestionPart; // This will be bold due to .question class
+                commentMessage.textContent = baseQuestion + specificQuestionPart;
                 commentsTextarea.placeholder = placeholderSpecific;
-                commentsTextarea.setAttribute('required', 'required'); // Comments textarea is always required
 
-
-                // --- Logic for Contact Info Visibility ---
-                let isNegativeOverallFeedback = false;
-                if (recommendationValue && careValue && satisfactionValue) { // Ensure all three are rated
+                // --- UPDATED LOGIC for Contact Info: Show if score is 7 or less ---
+                let isLowScore = false;
+                if (recommendationValue) {
                     const recNum = parseInt(recommendationValue);
-                    
-                    isNegativeOverallFeedback = (recNum <= 4 && 
-                               (careValue === 'Dissatisfied' || careValue === 'Very Dissatisfied') &&
-                               (satisfactionValue === 'Dissatisfied' || satisfactionValue === 'Very Dissatisfied'));
+                    isLowScore = recNum <= 7; // Condition is now score 7 or less
                 }
 
-                if (isNegativeOverallFeedback) {
+                if (isLowScore) {
                     contactInfoDiv.classList.remove('hidden');
                     phoneNumberInput.setAttribute('required', 'required');
-                    bestTimeInput.setAttribute('required', 'required');
+                    nameLabel.textContent = "Your Name (Optional, but having it helps us understand your feedback better and improve our service):";
                 } else {
                     contactInfoDiv.classList.add('hidden');
                     phoneNumberInput.removeAttribute('required');
-                    bestTimeInput.removeAttribute('required');
+                    nameLabel.textContent = "Your Name:"; 
                 }
             }
 
-            // Add event listeners to all relevant radio buttons
-            [...recommendationRadios, ...careRadios, ...satisfactionRadios].forEach(radio => {
+            allRadios.forEach(radio => {
                 radio.addEventListener('change', updateDynamicSections);
             });
 
-            // Initial call to set up the form state
             updateDynamicSections();
 
-            // Function to reset the entire feedback process
             function resetFeedbackProcess() {
-                feedbackForm.reset(); // Resets all form inputs including radios
-                commentsTextarea.value = '';
-                phoneNumberInput.value = '';
-                bestTimeInput.value = '';
-                
-                // Comments textarea is always required now
-                commentsTextarea.setAttribute('required', 'required'); 
-                phoneNumberInput.removeAttribute('required'); // Remove required for contact info on reset
-                bestTimeInput.removeAttribute('required');
-
-                // Re-evaluate to hide sections and clear dynamic content
+                feedbackForm.reset(); 
                 updateDynamicSections(); 
-
-                finalSubmitButton.disabled = false; // Ensure it's re-enabled
-                finalSubmitButton.textContent = 'Submit Feedback'; // Reset text
+                finalSubmitButton.disabled = false;
+                finalSubmitButton.textContent = 'Submit Feedback';
             }
-
 
             feedbackForm.addEventListener('submit', async function(event) { 
                 event.preventDefault(); 
-                console.log('Form submission triggered');
-
+                
                 const recommendation = document.querySelector('input[name="recommendation"]:checked');
                 const care = document.querySelector('input[name="care"]:checked');
                 const satisfaction = document.querySelector('input[name="satisfaction"]:checked');
                 
-                // Basic validation for required rating fields
                 if (!recommendation || !care || !satisfaction) {
-                    alert('Please answer all questions before submitting.');
+                    alert('Please answer all rating questions before submitting.');
                     return;
                 }
 
-                const recommendationValue = parseInt(recommendation.value);
-                const careValue = care.value;
-                const satisfactionValue = satisfaction.value;
-                const comments = commentsTextarea.value.trim(); // Get comments
-
-                // Validate comments since it's always required
                 if (commentsTextarea.value.trim() === '') {
                     alert('Please provide your comments for the recommendation score.');
                     commentsTextarea.focus();
                     return;
                 }
 
-                const submissionDate = new Date().toISOString(); 
+                const recommendationValue = parseInt(recommendation.value);
 
                 const feedbackData = {
                     recommendation: recommendationValue,
-                    care: careValue,
-                    satisfaction: satisfactionValue,
-                    comments: comments, // Comments are always included if provided
-                    timestamp: submissionDate
+                    care: care.value,
+                    satisfaction: satisfaction.value,
+                    comments: commentsTextarea.value.trim(),
+                    timestamp: new Date().toISOString()
                 };
 
-                // Check if contact info should be collected (if section is visible due to negative feedback)
-                const isNegativeOverallFeedback = (recommendationValue <= 4 && 
-                               (careValue === 'Dissatisfied' || careValue === 'Very Dissatisfied') &&
-                               (satisfactionValue === 'Dissatisfied' || satisfactionValue === 'Very Dissatisfied'));
-
-                if (isNegativeOverallFeedback && !contactInfoDiv.classList.contains('hidden')) {
+                // --- UPDATED LOGIC for Data Collection: Collect if score is 7 or less ---
+                if (recommendationValue <= 7) {
                     const phoneNumber = phoneNumberInput.value.trim();
-                    const bestTime = bestTimeInput.value.trim();
+                    const name = nameInput.value.trim();
 
-                    // If contact info section is visible, and inputs are required, validate them
-                    if (phoneNumberInput.hasAttribute('required') && bestTimeInput.hasAttribute('required')) {
-                         if (!phoneNumber || !bestTime) {
-                            alert("Please fill out both phone number and best time fields if you wish to be contacted.");
-                            return;
-                        }
+                    if (!phoneNumber) {
+                        alert("Please provide a phone number so we can follow up on your feedback.");
+                        phoneNumberInput.focus();
+                        return;
                     }
                     
-                    // Only add to feedbackData if actually provided
-                    if (phoneNumber) feedbackData.phoneNumber = phoneNumber;
-                    if (bestTime) feedbackData.bestTime = bestTime;
-                    if (phoneNumber || bestTime) feedbackData.contactInfoProvided = true;
-
+                    feedbackData.phoneNumber = phoneNumber;
+                    if (name) {
+                        feedbackData.name = name;
+                    }
                 }
 
                 const originalBtnText = finalSubmitButton.textContent;
@@ -591,18 +470,13 @@
 
                 try {
                     await addDoc(collection(db, 'feedback'), feedbackData);
-                    console.log('Feedback data sent to Firestore successfully.');
 
-                    const isPositiveFeedback = (recommendationValue >= 7 && 
-                               (careValue === 'Satisfied' || careValue === 'Very Satisfied') &&
-                               (satisfactionValue === 'Satisfied' || satisfactionValue === 'Very Satisfied'));
+                    const isPositiveFeedback = (recommendationValue >= 9);
 
                     if (isPositiveFeedback) {
-                        console.log('Positive feedback detected.');
-                        window.open('https://www.google.com/maps/place//data=!4m3!3m2!1s0x882b328b0bfefb7f:0xd08043c55ff9005e!12e1?source=g.page.m.nr._&laa=nmx-review-solicitation-recommendation-card', '_blank');
-                        alert('Thank you for your positive feedback! Golden Care Dental Services would love your feedback on Google. Please consider posting a review.');
+                        window.open('https://www.google.com/maps/place//data!4m3!3m2!1s0x882b328b0bfefb7f:0xd08043c55ff9005e!12e1?source=g.page.m.nr._&laa=nmx-review-solicitation-recommendation-card', '_blank');
+                        alert('Thank you for your positive feedback! We would love for you to share your experience on Google. Please consider posting a review.');
                     } else {
-                        // For neutral/negative, show general thank you, contact info handled by form itself
                         alert('Thank you for your valuable feedback!');
                     }
                     
