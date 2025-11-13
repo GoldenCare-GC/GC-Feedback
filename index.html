@@ -231,6 +231,16 @@
             font-style: italic;
         }
 
+        .comment-disclaimer {
+            font-size: 14px;
+            font-style: italic;
+            color: #777;
+            text-align: left;
+            padding-left: 10px; /* Align with question */
+            margin-top: -10px; /* Bring closer to question */
+            margin-bottom: 10px;
+        }
+
         /* Full-page Image Background Styles */
         #background-image-container { 
             position: fixed;
@@ -279,7 +289,7 @@
         <h2>Feedback Form</h2>
         <!-- MOVED: Disclaimer is now here -->
         <p class="disclaimer-text">
-            This is an autonomous feedback form. Your submission is anonymous unless you voluntarily provide your contact information.
+            Your responses are anonymous and aren’t linked to your name or your loved one’s information. If you’d like to share your name or contact details, you’re welcome to do so - completely optional.
         </p>
 
         <form id="feedbackForm">
@@ -316,7 +326,8 @@
             </div>
 
             <div id="commentAndContactSection">
-                <p id="commentMessage" class="question">What's the primary reason for your score?</p> 
+                <p id="commentMessage" class="question">What's the primary reason for your score?</p>
+                <p class="comment-disclaimer">Your comment is anonymous unless you choose to add your name.</p>
                 <label for="commentsTextarea"></label>
                 <textarea id="commentsTextarea" rows="4" required></textarea>
 
